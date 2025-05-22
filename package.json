@@ -1,0 +1,8 @@
+{
+  "name": "ng-postbuild",
+  "version": "1.0.0",
+  "bin": {
+    "ng-postbuild": "post-build.mjs"
+  },
+  "type": "module"
+}
