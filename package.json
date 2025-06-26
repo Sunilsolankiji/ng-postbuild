@@ -1,6 +1,6 @@
 {
   "name": "ng-postbuild",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A post-build CLI utility for Angular projects to flatten and cleanup the dist output.",
   "type": "module",
   "main": "post-build.mjs",
