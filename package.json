@@ -1,6 +1,6 @@
 {
   "name": "ng-postbuild",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "A post-build CLI utility for Angular projects to flatten and cleanup the dist output.",
   "type": "module",
   "main": "post-build.mjs",
@@ -30,7 +30,7 @@
     "url": "https://github.com/sunilsolankiji/ng-postbuild/issues"
   },
   "homepage": "https://github.com/sunilsolankiji/ng-postbuild#readme",
-  "devDependencies": {
+  "dependencies": {
     "tar": "^7.x.x"
   }
 }
