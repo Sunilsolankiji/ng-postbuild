@@ -1,76 +1,170 @@
 #!/usr/bin/env node
 
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import fs from "fs";
+import path from "path";
+import * as tar from "tar";
 
-console.log('Script started');
+// CLI args parsing
+const args = process.argv.slice(2);
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Show help and exit if --help is passed
+if (args.includes("--help")) {
+  console.log(`
+🛠️ ng-postbuild CLI Help
 
-const projectRoot = process.cwd();
-const angularJsonPath = path.join(projectRoot, 'angular.json');
+Usage:
+  ng-postbuild [options]
 
-console.log('Project root:', projectRoot);
-console.log('angular.json path:', angularJsonPath);
+Options:
+  --out <filename>         Output tar file name (default: <project>.tar)
+  --rename <foldername>    Rename project folder inside the archive
+  --no-compress            Skip tar compression
+  --help                   Show this help message
 
-if (!fs.existsSync(angularJsonPath)) {
-  console.error('❌ angular.json not found in current directory.');
-  process.exit(1);
+Examples:
+  ng-postbuild
+  ng-postbuild --out build.tar
+  ng-postbuild --rename my-app
+  ng-postbuild --no-compress
+  ng-postbuild --rename my-app --out app
+`);
+  process.exit(0);
 }
 
-console.log('angular.json found, reading it...');
+const outFlagIndex = args.indexOf("--out");
+const renameFlagIndex = args.indexOf("--rename");
+
+const shouldCompress = !args.includes("--no-compress");
+const outFileName =
+  outFlagIndex !== -1 && args[outFlagIndex + 1] ? args[outFlagIndex + 1] : null;
+const renamedFolder =
+  renameFlagIndex !== -1 && args[renameFlagIndex + 1]
+    ? args[renameFlagIndex + 1]
+    : null;
+
+// Log CLI options
+console.log("🛠️ CLI Options:");
+console.log(
+  `   ➤ Compression:       ${
+    shouldCompress ? "Enabled" : "Disabled"
+  } (--no-compress to disable)`
+);
+console.log(
+  `   ➤ Output Tar Name:   ${
+    outFileName || "[default: <project>.tar]"
+  } (--out <filename>)`
+);
+console.log(
+  `   ➤ Rename Folder To:  ${
+    renamedFolder || "[unchanged]"
+  } (--rename <foldername>)`
+);
+console.log("");
+
+console.log("✅ Post-build script started");
+
+const projectRoot = process.cwd();
+const angularJsonPath = path.join(projectRoot, "angular.json");
+
+if (!fs.existsSync(angularJsonPath)) {
+  console.error("❌ angular.json not found in current directory.");
+  process.exit(1);
+}
 
 let angularConfig;
 try {
-  angularConfig = JSON.parse(fs.readFileSync(angularJsonPath, 'utf-8'));
-  console.log('angular.json parsed successfully');
+  angularConfig = JSON.parse(fs.readFileSync(angularJsonPath, "utf-8"));
+  console.log("angular.json parsed successfully");
 } catch (err) {
-  console.error('❌ Failed to parse angular.json:', err.message);
+  console.error("❌ Failed to parse angular.json:", err.message);
   process.exit(1);
 }
 
-const defaultProject = angularConfig.defaultProject || Object.keys(angularConfig.projects)[0];
-console.log('Default project:', defaultProject);
+const defaultProject =
+  angularConfig.defaultProject || Object.keys(angularConfig.projects)[0];
 
-const outputPath = angularConfig.projects?.[defaultProject]?.architect?.build?.options?.outputPath;
-console.log('Output path:', outputPath);
+const outputPath =
+  angularConfig.projects?.[defaultProject]?.architect?.build?.options
+    ?.outputPath;
 
 if (!outputPath) {
-  console.error('❌ Could not determine outputPath from angular.json.');
+  console.error("❌ Could not determine outputPath from angular.json.");
   process.exit(1);
 }
 
 const distRoot = path.join(projectRoot, outputPath);
-const browserPath = path.join(distRoot, 'browser');
-
-console.log('Dist root:', distRoot);
-console.log('Browser folder:', browserPath);
+const browserPath = path.join(distRoot, "browser");
 
 if (!fs.existsSync(browserPath)) {
   console.error(`❌ Browser folder not found: ${browserPath}`);
   process.exit(1);
 }
 
+// Move files from /browser to dist root
 fs.readdirSync(browserPath).forEach((file) => {
   const src = path.join(browserPath, file);
-  const destFileName = file === 'index.csr.html' ? 'index.html' : file;
+  const destFileName = file === "index.csr.html" ? "index.html" : file;
   const dest = path.join(distRoot, destFileName);
 
   try {
     fs.renameSync(src, dest);
-    console.log(`Moved ${file} to ${destFileName}`);
+    console.log(`Moved ${file} → ${destFileName}`);
   } catch (err) {
     console.error(`❌ Failed to move file "${file}":`, err.message);
   }
 });
 
+// Remove browser folder
 try {
   fs.rmSync(browserPath, { recursive: true, force: true });
-  console.log(`✅ Browser folder removed`);
+  console.log(`✅ Removed browser folder`);
 } catch (err) {
   console.error(`❌ Failed to remove browser folder:`, err.message);
 }
 
-console.log('✅ Post-build script finished');
+if (shouldCompress) {
+  const archiveName = `${outFileName || defaultProject}.tar`;
+  const archivePath = path.join(projectRoot, archiveName);
+  const distFolderName = path.basename(distRoot);
+  const archiveFolderName = renamedFolder || distFolderName;
+
+  console.log(`📦 Creating archive: ${archivePath}`);
+
+  // Temporarily copy to a virtual structure like dist/renamedFolder/
+  const tempBase = path.join(projectRoot, "dist");
+  const sourcePath = path.join("dist", distFolderName); // relative
+  const targetPath = path.join("dist", archiveFolderName); // how it should appear inside tar
+
+  tar
+    .c(
+      {
+        gzip: false,
+        file: archivePath,
+        cwd: projectRoot,
+        portable: true,
+        noMtime: true,
+        // Rename dist/project to dist/renamed if needed
+        transform: (entry) => {
+          if (renamedFolder) {
+            const updatedPath = entry.path.replace(
+              new RegExp(`^dist/${distFolderName}`),
+              `dist/${renamedFolder}`
+            );
+            entry.path = updatedPath;
+          }
+          return entry;
+        },
+      },
+      [sourcePath]
+    )
+    .then(() => {
+      console.log(`✅ Archive created: ${archivePath}`);
+    })
+    .catch((err) => {
+      console.error(`❌ Failed to create archive:`, err.message);
+    });
+} else {
+  console.log("⚠️ Compression skipped (use --no-compress to disable)");
+}
+
+console.log("✅ Post-build script finished");

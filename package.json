@@ -1,8 +1,36 @@
 {
   "name": "ng-postbuild",
-  "version": "1.0.0",
+  "version": "1.1.0",
+  "description": "A post-build CLI utility for Angular projects to flatten and cleanup the dist output.",
+  "type": "module",
+  "main": "post-build.mjs",
   "bin": {
     "ng-postbuild": "post-build.mjs"
   },
-  "type": "module"
+  "files": [
+    "post-build.mjs"
+  ],
+  "keywords": [
+    "angular",
+    "postbuild",
+    "cli",
+    "build",
+    "ng",
+    "dist",
+    "cleanup",
+    "angular.json"
+  ],
+  "author": "Sunil Solanki",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sunilsolankiji/ng-postbuild.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sunilsolankiji/ng-postbuild/issues"
+  },
+  "homepage": "https://github.com/sunilsolankiji/ng-postbuild#readme",
+  "dependencies": {
+    "tar": "^7.x.x"
+  }
 }
