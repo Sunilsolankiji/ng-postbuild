@@ -30,7 +30,7 @@
     "url": "https://github.com/sunilsolankiji/ng-postbuild/issues"
   },
   "homepage": "https://github.com/sunilsolankiji/ng-postbuild#readme",
-  "dependencies": {
+  "devDependencies": {
     "tar": "^7.x.x"
   }
 }
