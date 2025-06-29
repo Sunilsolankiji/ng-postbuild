@@ -18,7 +18,7 @@
 ### 🔧 As a Global CLI Tool (recommended for manual use)
 
 ```bash
-npm install -g --save-dev ng-postbuild
+npm install -g ng-postbuild
 ```
 
 ### After building your Angular app, you can run it directly:
@@ -30,7 +30,7 @@ ng-postbuild
 ### 🛠️ As a Dev Dependency (recommended for automation or CI/CD)
 
 ```bash
-npm install -g --save-dev ng-postbuild
+npm install --save-dev ng-postbuild
 ```
 
 ### Then add it to your package.json scripts:
