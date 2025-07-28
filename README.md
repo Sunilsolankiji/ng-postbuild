@@ -15,7 +15,7 @@
 
 ## 📦 Installation
 
-### 🔧 As a Global CLI Tool (recommended for manual use)
+### 🔧 As a Global CLI Tool (recommended for local or manual use)
 
 ```bash
 npm install -g ng-postbuild
@@ -38,8 +38,9 @@ npm install --save-dev ng-postbuild
 ```json
 {
   "scripts": {
-    "build": "ng build --configuration production",
-    "postbuild": "ng-postbuild"
+    "build:dev": "ng build --base-href /test-project {optional} --configuration development && ng-postbuild --out {tar file name example - dist_test_project}",
+    "build:prod": "ng build --base-href /test-project {optional} --configuration production && ng-postbuild  --out {tar file name example - dist_test_project}",
+    "build:both": "npm run build:dev && npm run build:prod"
   }
 }
 ```
@@ -47,7 +48,7 @@ npm install --save-dev ng-postbuild
 ### Now simply run:
 
 ```bash
-npm run build && npm run postbuild
+npm run build:dev (or :prod or :both)
 ```
 
 ### ⚙️ CLI Options
