@@ -110,7 +110,7 @@ fs.readdirSync(browserPath).forEach((file) => {
     fs.renameSync(src, dest);
     console.log(`Moved ${file} → ${destFileName}`);
   } catch (err) {
-    console.error(`\x1b[31m❌ Failed to move file "${file}":\x1b[0m`, `\x1b[31merr.message\x1b[0m`);
+    console.error(`\x1b[31m❌ Failed to move file "${file}":\x1b[0m`, `\x1b[31m${err.message}\x1b[0m`);
     console.error(`\x1b[31m❌ Please check and test your build folder\x1b[0m`);
     process.exit(1); // Exit the process on error
   }
