@@ -110,7 +110,9 @@ fs.readdirSync(browserPath).forEach((file) => {
     fs.renameSync(src, dest);
     console.log(`Moved ${file} → ${destFileName}`);
   } catch (err) {
-    console.error(`❌ Failed to move file "${file}":`, err.message);
+    console.error(`\x1b[31m❌ Failed to move file "${file}":\x1b[0m`, `\x1b[31merr.message\x1b[0m`);
+    console.error(`\x1b[31m❌ Please check and test your build folder\x1b[0m`);
+    process.exit(1); // Exit the process on error
   }
 });
 
@@ -126,14 +128,11 @@ if (shouldCompress) {
   const archiveName = `${outFileName || defaultProject}.tar`;
   const archivePath = path.join(projectRoot, archiveName);
   const distFolderName = path.basename(distRoot);
-  const archiveFolderName = renamedFolder || distFolderName;
 
   console.log(`📦 Creating archive: ${archivePath}`);
 
   // Temporarily copy to a virtual structure like dist/renamedFolder/
-  const tempBase = path.join(projectRoot, "dist");
   const sourcePath = path.join("dist", distFolderName); // relative
-  const targetPath = path.join("dist", archiveFolderName); // how it should appear inside tar
 
   tar
     .c(
