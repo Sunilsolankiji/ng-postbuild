@@ -57,7 +57,8 @@ npm run build:dev (or :prod or :both)
 | ------------------- | ------------------------------------------------------------------------------ | ---------------------------------------------------- |
 | `--out <filename>`  | Specify the name of the output `.tar` archive file.                            | `<defaultProject>.tar`                               |
 | `--rename <folder>` | Rename the project folder inside the archive (e.g., rename `my-app` folder).   | Unchanged (original name from angular.json)          |
-| `--no-compress`     | Skip creating the `.tar` archive; only moves and cleans up files.              | Compression enabled       |Include `dist/` folder    |
+| `--no-compress`     | Skip creating the `.tar` archive; only moves and cleans up files.              | Compression enabled - Include `dist/` folder         |
+| `--delete-server`   | Delete the "server" folder after build                                         | Does not delete server folder from dist              |
 | `--help`            | Display help information and exit.                                             | N/A                                                  |
 
 ### 📂 Example Workflow

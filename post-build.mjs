@@ -19,6 +19,7 @@ Options:
   --out <filename>         Output tar file name (default: <project>.tar)
   --rename <foldername>    Rename project folder inside the archive
   --no-compress            Skip tar compression
+  --delete-server          Delete the "server" folder after build
   --help                   Show this help message
 
 Examples:
@@ -41,6 +42,7 @@ const renamedFolder =
   renameFlagIndex !== -1 && args[renameFlagIndex + 1]
     ? args[renameFlagIndex + 1]
     : null;
+const deleteServer = args.includes("--delete-server");
 
 // Log CLI options
 console.log("🛠️ CLI Options:");
@@ -58,6 +60,9 @@ console.log(
   `   ➤ Rename Folder To:  ${
     renamedFolder || "[unchanged]"
   } (--rename <foldername>)`
+);
+console.log(
+  `   ➤ Delete Server:     ${deleteServer ? "Yes" : "No"} (--delete-server)`
 );
 console.log("");
 
@@ -110,7 +115,10 @@ fs.readdirSync(browserPath).forEach((file) => {
     fs.renameSync(src, dest);
     console.log(`Moved ${file} → ${destFileName}`);
   } catch (err) {
-    console.error(`\x1b[31m❌ Failed to move file "${file}":\x1b[0m`, `\x1b[31m${err.message}\x1b[0m`);
+    console.error(
+      `\x1b[31m❌ Failed to move file "${file}":\x1b[0m`,
+      `\x1b[31m${err.message}\x1b[0m`
+    );
     console.error(`\x1b[31m❌ Please check and test your build folder\x1b[0m`);
     process.exit(1); // Exit the process on error
   }
@@ -122,6 +130,20 @@ try {
   console.log(`✅ Removed browser folder`);
 } catch (err) {
   console.error(`❌ Failed to remove browser folder:`, err.message);
+}
+
+if (deleteServer) {
+  const serverPath = path.join(distRoot, "server");
+  if (fs.existsSync(serverPath)) {
+    try {
+      fs.rmSync(serverPath, { recursive: true, force: true });
+      console.log(`✅ Deleted server folder`);
+    } catch (err) {
+      console.error(`❌ Failed to delete server folder:`, err.message);
+    }
+  } else {
+    console.log(`⚠️ Server folder not found, skipping delete`);
+  }
 }
 
 if (shouldCompress) {
